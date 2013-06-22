@@ -138,38 +138,43 @@ $(document).ready(function() {
     // pusher:subscription_succeeded
     channel.bind('pusher:subscription_succeeded', function(data) {
         
-        // form submit
-        $("#command-form").submit(function() {
+    });
 
-            var command = $('#command').val();
+    // form submit
+    $("form").submit(function(e) {
 
-            // empty message
-            if (command == '') {
-                alert('We need a message, Commander!');
-                return false;
-            }
+    	e.preventDefault();
 
-            // add to command history
-            $('#command-history').prepend('<li>' + command + '</li>');
-            
-            // fade in
-            $('#command-history').find('li:first').hide().fadeIn();
+        var command = $('#command').val();
 
-            // send to pusher                    
-            channel.trigger('client-command', {
-                'command': command
-            });
-
-            // focus for easy re-entry
-            $('#command').val('').focus();
-
-            // scroll to top of message history
-            $('#command-history')[0].scrollTop = 0;
-
-            // stop default form submit
+        // empty message
+        if (command == '') {
+	        $('#command').val('');
+	        $('#command').focus();
             return false;
+        }
 
+        // add to command history
+        $('#command-history').prepend('<li>' + command + '</li>');
+        
+        // fade in
+        $('#command-history').find('li:first').hide().fadeIn();
+
+        // send to pusher                    
+        channel.trigger('client-command', {
+            'command': command
         });
+
+        // focus for easy re-entry
+        $('#command').val('');
+        $('#command').focus();
+
+        // scroll to top of message history
+        $('#command-history')[0].scrollTop = 0;
+
+        // stop default form submit
+        return false;
+
     });
 
     // pusher:member_added
