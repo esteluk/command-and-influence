@@ -94,16 +94,47 @@
                 }
             };
 
+            Pusher.channel_auth_endpoint = 'http://jakexks.com/pusher/auth.php';
+
             var pusher = new Pusher('7d3ebc72c0912d712cd6');
             
-            var channel = pusher.subscribe('anothergame');
+            var channel = pusher.subscribe('presence-game-1');
             
-            //channel.bind('command', function(data) {
-            //    console.log(data.message);
-            //});
+            // Pusher Error
+            channel.bind('pusher:subscription_error', function(error) {
+                console.log(error);
+            });
 
-            channel.bind('pusher:subscription_succeeded', function() {
-                var triggered = channel.trigger('client-event-name', { 'message' : 'javascript test' });
+            // Client Location
+            channel.bind('client-location', function(data) {
+                console.log('client-location', data);
+            });
+
+            // Pusher Success
+            channel.bind('pusher:subscription_succeeded', function(data) {
+                
+                // form submit
+                $("#command-form").submit(function() {
+
+                    var command = $('#command').val();
+
+                    // empty message
+                    if (command == '') {
+                        alert('We need a message, Commander!');
+                        return false;
+                    }
+
+                    var data = {
+    //                    'id': 1,
+    //                    'command': command
+                        'command': command
+                    };
+                    
+                    channel.trigger('client-command', data);
+
+                    // stop default form submit
+                    return false;
+                });
             });
 
             $(window).resize(function() {
@@ -114,28 +145,7 @@
                 $('aside').find('ul').css('height', $(window).outerHeight() - $('aside').find('form').outerHeight());
             }
 
-                var data = {
-//                    'id': 1,
-//                    'command': command
-                    'message': 'test'
-                };
-                
-                pusher.trigger('anothergame', 'command', data);
-
-            // form submit
-            $("form").submit(function() {
-
-                var command = $('#command').val();
-
-                // empty message
-                if (command == '') {
-                    alert('We need a message, Commander!');
-                    return false;
-                }
-
-                // stop default form submit
-                return false;
-            });
+            
 
         });
 
@@ -151,46 +161,19 @@
         <div id="map-canvas"></div>
 
         <aside>
+            
             <ul id="previous-commands">
                 <li>Move to NW1 0JG</li>
                 <li>Move to HMV Picadilly Circus</li>
                 <li>Play an Air Guitar solo</li>
-                <li>Move to NW1 0JG</li>
-                <li>Move to HMV Picadilly Circus</li>
-                <li>Play an Air Guitar solo</li>
-                <li>Move to NW1 0JG</li>
-                <li>Move to HMV Picadilly Circus</li>
-                <li>Play an Air Guitar solo</li>
-                <li>Move to NW1 0JG</li>
-                <li>Move to HMV Picadilly Circus</li>
-                <li>Play an Air Guitar solo</li>
-                <li>Move to NW1 0JG</li>
-                <li>Move to HMV Picadilly Circus</li>
-                <li>Play an Air Guitar solo</li>
-                <li>Move to NW1 0JG</li>
-                <li>Move to HMV Picadilly Circus</li>
-                <li>Play an Air Guitar solo</li>
-                <li>Move to NW1 0JG</li>
-                <li>Move to HMV Picadilly Circus</li>
-                <li>Play an Air Guitar solo</li>
-                <li>Move to NW1 0JG</li>
-                <li>Move to HMV Picadilly Circus</li>
-                <li>Play an Air Guitar solo</li>
-                <li>Move to NW1 0JG</li>
-                <li>Move to HMV Picadilly Circus</li>
-                <li>Play an Air Guitar solo</li>
-                <li>Move to NW1 0JG</li>
-                <li>Move to HMV Picadilly Circus</li>
-                <li>Play an Air Guitar solo</li>
-                <li>Move to NW1 0JG</li>
-                <li>Move to HMV Picadilly Circus</li>
-                <li>Play an Air Guitar solo LAST</li>
             </ul>
-            <form>
+            
+            <form method="post" action="#" id="command-form">
                 <!-- input type="button" value="Connect with LinkedIn" id="connect" / -->
                 <textarea id="command" name="command" placeholder="Send a command..."></textarea>
                 <input type="submit" value="Send" id="send" name="send" />
             </form>
+
         </aside>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
