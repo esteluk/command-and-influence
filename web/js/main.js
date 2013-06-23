@@ -5,6 +5,12 @@ var troops = {}; // Your troops
 var selected_troop;
 var currentPosition; // The shared current position object
 var pushToken; // A push notification token for the device
+var paths = {}
+var polyOptions = {
+	strokeColor: '#000000',
+	strokeOpacity: 1.0,
+	strokeWeight: 3
+}
 
 $(document).ready(function() {
 
@@ -79,7 +85,7 @@ $(document).ready(function() {
 		});
 
 	    var mapOptions = {
-	        zoom: 20,
+	        zoom: 15,
 //	        mapTypeId: google.maps.MapTypeId.TERRAIN,
 	        streetViewControl: false //,
 //	        maxZoom: 22,
@@ -88,7 +94,15 @@ $(document).ready(function() {
 	    map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
 	    google.maps.event.addListener(map, 'click', function(event) {
+
 	    	console.log('Clicked on map', event);
+
+	        // no troop selected
+	        if (typeof(selected_troop) == 'undefined') {
+	        	alert('Select a troop, Commander!');
+		        $('#location').focus();
+	            return false;
+	        }
 
 			$("#location").val(event.latLng.jb + " " + event.latLng.kb);
 		});
@@ -118,6 +132,11 @@ $(document).ready(function() {
 
 				currentPosition = new CBHelperCurrentLocation(position.coords.latitude, position.coords.longitude, position.coords.altitude);
 				helper.currentLocation = currentPosition;
+
+//				infowindow = new google.maps.InfoWindow({
+//					content: "<div style='width:200px; height:100px; overflow:scroll;'><img style='float:left; margin:0 5px 5px 0;' src=\""+val[1].picUrl+"\" >"+val[1].name+": Peerindex: "+val[0]+" tweet: "+val[1].tweet+"</div>"
+//				});
+
 
 //				var pushManager = new PushNotificationManager();
 				
@@ -188,19 +207,21 @@ $(document).ready(function() {
 	        position: new google.maps.LatLng(latitude, longitude),
 	        map: map,
 	        title: latitude + ', ' + longitude,
-	        icon: markers.directory + 'darkgreen' + '_marker' + surname[0].toUpperCase() + '.png',
+	        icon: markers.directory + 'darkgreen' + '_Marker' + surname[0].toUpperCase() + '.png',
+	        defaultIcon: markers.directory + 'darkgreen' + '_Marker' + surname[0].toUpperCase() + '.png',
+	        selectedIcon: markers.directory + 'red' + '_Marker' + surname[0].toUpperCase() + '.png',
 	        draggable: true
 	    });
 
+	    paths[id] = new google.maps.Polyline(polyOptions);
+		paths[id].setMap(map);
+
 		google.maps.event.addListener(troops[id], 'click', function() {
+//			console.log('this', this);
 			console.log('clicked marker', this.name);
-//			$(troops).each(function(index, value){
-//				troops[index].setIcon(markers.directory + 'darkgreen' + '_marker' + this.letter + '.png');
-//			});
+			reset_marker_icons();
 			selected_troop = id;
-			console.log('this', this);
-			this.colour = 'red';
-			this.setIcon(markers.directory + this.colour + '_marker' + this.letter + '.png');
+			this.setIcon(this.selectedIcon);
 		});
 
 	}
@@ -213,10 +234,11 @@ $(document).ready(function() {
 	    console.log('removing marker', id);
 
 	    // add marker
-	    troops[surname] = null;
+	    delete(troops[id]);
+	    delete(paths[id]);
 
-		google.maps.event.addListener(troops[surname], 'click', function() {
-			console.log('clicked marker', surname);
+		google.maps.event.addListener(troops[id], 'click', function() {
+			console.log('removed marker', id);
 		});
 
 	}
@@ -227,7 +249,20 @@ $(document).ready(function() {
 	function update_marker(id, latitude, longitude) {
 		console.log('update_marker', latitude, longitude, id);
 	    troops[id].setPosition(new google.maps.LatLng(latitude, longitude));
+		var path = paths[id].getPath();
+		path.push(new google.maps.LatLng(latitude, longitude));
+		delete(path[0]);
 	}
+
+	function reset_marker_icons() {
+		console.log('reset_marker_icons', troops);
+        //  reset all the icons back to normal except the one you clicked
+//        $(troops).each(function(index, value) {
+//        	console.log('troops[' + index + ']', value);
+//            value.setIcon(value.defaultIcon);
+//        });
+
+    }
 
 	// @todo associate users with letters (first letter of first name?) and colours
 	var markers = {
@@ -271,7 +306,7 @@ $(document).ready(function() {
     });
 
     // form submit
-    $("#command-form").submit(function(e) {
+    $("#sendmessage").click(function(e) {
 
     	e.preventDefault();
 
@@ -281,15 +316,15 @@ $(document).ready(function() {
         console.log('selected_troop', selected_troop);
         if (typeof(selected_troop) == 'undefined') {
         	alert('Select a troop, Commander!');
-	        $('#command').focus();
+	        $('#message').focus();
             return false;
         }
 
-        // empty command
-        if (command == '') {
+        // empty message
+        if (message == '') {
         	alert('We need a command, Commander!');
-	        $('#command').val('');
-	        $('#command').focus();
+	        $('#message').val('');
+	        $('#message').focus();
             return false;
         }
 
@@ -319,8 +354,17 @@ $(document).ready(function() {
 
     });
 
-    $("#location-form").submit(function(e) {
+    $("#sendlocation").click(function(e) {
+    	
     	e.preventDefault();
+
+        // no troop selected
+        console.log('selected_troop', selected_troop);
+        if (typeof(selected_troop) == 'undefined') {
+        	alert('Select a troop, Commander!');
+	        $('#location').focus();
+            return false;
+        }
 
     	var latlng = $("#location").val().trim().split(" ");
     	if (latlng.length < 2) {
@@ -362,7 +406,64 @@ $(document).ready(function() {
     channel.bind('client-location', function(data) {
         console.log('client-location', data);
         // surname this is hardcoded for now until we handle marker add/update
-        add_marker(data.id, data.location.latitude, data.location.longitide);
+        update_marker(data.user, data.location.latitude, data.location.longitude);
     });
+
+	// http://paul-sobek.com/LocPeerIndexResultsExample.html
+	$.getJSON('http://paul-sobek.com/cgi-home/getLoc.py?lat=51.507887&lon=-0.131149&radius=1km', function(data) {
+		var items = [];
+
+		$.each(data, function(key, val) {
+
+		console.log('Twitter/peerindex', val[1].geo.coordinates[0]);
+		console.log('Twitter/peerindex', val[1].geo.coordinates[1]);
+		console.log('Twitter/peerindex', val[1].name);
+		console.log('Twitter/peerindex', val[1].tweet);
+		console.log('Twitter/peerindex', val[0]);
+		infowindow = new google.maps.InfoWindow({
+			content: "<div style='width:200px; height:100px; overflow:scroll;'><img style='float:left; margin:0 5px 5px 0;' src=\""+val[1].picUrl+"\" >"+val[1].name+": Peerindex: "+val[0]+" tweet: "+val[1].tweet+"</div>"
+		});
+
+		var marker = new google.maps.Marker({
+			position: new google.maps.LatLng(val[1].geo.coordinates[0], val[1].geo.coordinates[1]),
+			map: map,
+			title: val[1].name 
+		});
+		google.maps.event.addListener(marker, 'click', function() {
+			infowindow.open(map,marker);
+		});
+		//console.log('Twitter/peerindex', val[1].picUrl);
+		});
+	});
+/*
+
+	$('#summon').click(function(e){
+		e.preventDefault();
+		$.ajax({
+			type: "POST",
+			url: 'https://api.cloudbase.io/commandandinfluence/notifications',
+			data: {
+				'app_uniq' : '17b41ff67e279f762ba20a5bbc3fa959',
+				'app_pwd' : hex_md5('76Indnja'),
+				'device_uniq' : 'webapp',
+				'post_data' : JSON.stringify({ 
+					'channel': 'all',
+					'alert' : 'Help us track down this man'
+				}),
+//				'post_data' : 'foo',
+				'output_format': 'jsonp',
+//				'jsonp_function': 'foo',
+				'cb_js_helper': 'true'
+			},
+			success: function(response){
+				console.log('response', response);
+			},
+			crossDomain: true,
+			dataType: 'jsonp',
+			jsonp: 'foo'
+		});
+		return false;
+	});
+*/
 
 });
