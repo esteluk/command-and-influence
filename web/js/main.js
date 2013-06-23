@@ -434,8 +434,8 @@ $(document).ready(function() {
 		//console.log('Twitter/peerindex', val[1].picUrl);
 		});
 	});
+/*
 
-	/*
 	$('#summon').click(function(e){
 		e.preventDefault();
 		$.ajax({
@@ -445,21 +445,24 @@ $(document).ready(function() {
 				'app_uniq' : '17b41ff67e279f762ba20a5bbc3fa959',
 				'app_pwd' : hex_md5('76Indnja'),
 				'device_uniq' : 'webapp',
-				'post_data' : { 
+				'post_data' : JSON.stringify({ 
 					'channel': 'all',
 					'alert' : 'Help us track down this man'
-				},
+				}),
+//				'post_data' : 'foo',
 				'output_format': 'jsonp',
-				'jsonp_function': 'foo'
+//				'jsonp_function': 'foo',
+				'cb_js_helper': 'true'
 			},
 			success: function(response){
 				console.log('response', response);
 			},
+			crossDomain: true,
 			dataType: 'jsonp',
 			jsonp: 'foo'
 		});
 		return false;
 	});
-	*/
+*/
 
 });
