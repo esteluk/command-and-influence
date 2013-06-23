@@ -1,6 +1,8 @@
 var helper; // the CBHelper object
 var map; // The Google maps object
 var markers; // The Google maps markers
+var troops = {}; // Your troops
+var selected_troop;
 var currentPosition; // The shared current position object
 var pushToken; // A push notification token for the device
 
@@ -71,7 +73,7 @@ $(document).ready(function() {
 		    // add markers for your troops
 		    $(json.data.message).each(function(index, value){
 		        console.log('value', value);
-		        update_marker(value.cb_location.lat, value.cb_location.lng, value.last_name);
+		        add_marker(value.id, value.cb_location.lat, value.cb_location.lng, value.last_name);
 		    });
 
 		});
@@ -173,27 +175,58 @@ $(document).ready(function() {
 
 	google.maps.event.addDomListener(window, 'load', initialize);
 
-	function update_marker(latitude, longitude, surname) {
+	function add_marker(id, latitude, longitude, surname) {
 
 	    // grab a random colour and letter
-		// var colour = markers.colours[Math.floor(Math.random() * markers.colours.length)];
-	    var colour = 'darkgreen';
-	    console.log(surname);
-	    var letter = surname[0].toUpperCase();
+	    console.log('add_marker', id, latitude, longitude, surname);
 
 	    // add marker
-	    markers[surname] = new google.maps.Marker({
+	    troops[id] = new google.maps.Marker({
+	    	name: surname,
+	        letter: surname[0].toUpperCase(),
+	        colour: 'darkgreen',
 	        position: new google.maps.LatLng(latitude, longitude),
 	        map: map,
 	        title: latitude + ', ' + longitude,
-	        icon: markers.directory + colour + '_marker' + letter + '.png',
+	        icon: markers.directory + 'darkgreen' + '_marker' + surname[0].toUpperCase() + '.png',
 	        draggable: true
 	    });
 
-		google.maps.event.addListener(markers[surname], 'click', function() {
+		google.maps.event.addListener(troops[id], 'click', function() {
+			console.log('clicked marker', this.name);
+//			$(troops).each(function(index, value){
+//				troops[index].setIcon(markers.directory + 'darkgreen' + '_marker' + this.letter + '.png');
+//			});
+			selected_troop = id;
+			console.log('this', this);
+			this.colour = 'red';
+			this.setIcon(markers.directory + this.colour + '_marker' + this.letter + '.png');
+		});
+
+	}
+
+	/*
+	 * remove a troop marker
+	 */
+	function remove_marker(id) {
+
+	    console.log('removing marker', id);
+
+	    // add marker
+	    troops[surname] = null;
+
+		google.maps.event.addListener(troops[surname], 'click', function() {
 			console.log('clicked marker', surname);
 		});
 
+	}
+
+	/*
+	 * reposition a troop marker
+	 */
+	function update_marker(id, latitude, longitude) {
+		console.log('update_marker', latitude, longitude, id);
+	    troops[id].setPosition(new google.maps.LatLng(latitude, longitude));
 	}
 
 	// @todo associate users with letters (first letter of first name?) and colours
@@ -244,10 +277,19 @@ $(document).ready(function() {
 
         var message = $('#message').val();
 
-        // empty message
-        if (message == '') {
-	        $('#message').val('');
-	        $('#message').focus();
+        // no troop selected
+        console.log('selected_troop', selected_troop);
+        if (typeof(selected_troop) == 'undefined') {
+        	alert('Select a troop, Commander!');
+	        $('#command').focus();
+            return false;
+        }
+
+        // empty command
+        if (command == '') {
+        	alert('We need a command, Commander!');
+	        $('#command').val('');
+	        $('#command').focus();
             return false;
         }
 
@@ -260,6 +302,9 @@ $(document).ready(function() {
         // send to pusher                    
         channel.trigger('client-command', {
             'message': message
+            'command': command,
+            'from': 'commander',
+            'to': selected_troop
         });
 
         // focus for easy re-entry
@@ -317,7 +362,7 @@ $(document).ready(function() {
     channel.bind('client-location', function(data) {
         console.log('client-location', data);
         // surname this is hardcoded for now until we handle marker add/update
-        update_marker(data.location.latitude, data.location.longitide, 'McAlpine');
+        add_marker(data.id, data.location.latitude, data.location.longitide);
     });
 
 });
