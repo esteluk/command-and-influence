@@ -207,9 +207,9 @@ $(document).ready(function() {
 	        position: new google.maps.LatLng(latitude, longitude),
 	        map: map,
 	        title: latitude + ', ' + longitude,
-	        icon: markers.directory + 'darkgreen' + '_marker' + surname[0].toUpperCase() + '.png',
-	        defaultIcon: markers.directory + 'darkgreen' + '_marker' + surname[0].toUpperCase() + '.png',
-	        selectedIcon: markers.directory + 'red' + '_marker' + surname[0].toUpperCase() + '.png',
+	        icon: markers.directory + 'darkgreen' + '_Marker' + surname[0].toUpperCase() + '.png',
+	        defaultIcon: markers.directory + 'darkgreen' + '_Marker' + surname[0].toUpperCase() + '.png',
+	        selectedIcon: markers.directory + 'red' + '_Marker' + surname[0].toUpperCase() + '.png',
 	        draggable: true
 	    });
 
