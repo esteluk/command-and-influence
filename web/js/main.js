@@ -79,7 +79,7 @@ $(document).ready(function() {
 		});
 
 	    var mapOptions = {
-	        zoom: 20,
+	        zoom: 16,
 //	        mapTypeId: google.maps.MapTypeId.TERRAIN,
 	        streetViewControl: false //,
 //	        maxZoom: 22,
@@ -183,18 +183,17 @@ $(document).ready(function() {
 	        map: map,
 	        title: latitude + ', ' + longitude,
 	        icon: markers.directory + 'darkgreen' + '_marker' + surname[0].toUpperCase() + '.png',
+	        defaultIcon: markers.directory + 'darkgreen' + '_marker' + surname[0].toUpperCase() + '.png',
+	        selectedIcon: markers.directory + 'red' + '_marker' + surname[0].toUpperCase() + '.png',
 	        draggable: true
 	    });
 
 		google.maps.event.addListener(troops[id], 'click', function() {
+//			console.log('this', this);
 			console.log('clicked marker', this.name);
-//			$(troops).each(function(index, value){
-//				troops[index].setIcon(markers.directory + 'darkgreen' + '_marker' + this.letter + '.png');
-//			});
+			reset_marker_icons();
 			selected_troop = id;
-			console.log('this', this);
-			this.colour = 'red';
-			this.setIcon(markers.directory + this.colour + '_marker' + this.letter + '.png');
+			this.setIcon(this.selectedIcon);
 		});
 
 	}
@@ -222,6 +221,16 @@ $(document).ready(function() {
 		console.log('update_marker', latitude, longitude, id);
 	    troops[id].setPosition(new google.maps.LatLng(latitude, longitude));
 	}
+
+	function reset_marker_icons() {
+		console.log('reset_marker_icons', troops);
+        //  reset all the icons back to normal except the one you clicked
+//        $(troops).each(function(index, value) {
+//        	console.log('troops[' + index + ']', value);
+//            value.setIcon(value.defaultIcon);
+//        });
+
+    }
 
 	// @todo associate users with letters (first letter of first name?) and colours
 	var markers = {
@@ -326,7 +335,7 @@ $(document).ready(function() {
     channel.bind('client-location', function(data) {
         console.log('client-location', data);
         // surname this is hardcoded for now until we handle marker add/update
-        add_marker(data.id, data.location.latitude, data.location.longitide);
+        update_marker(data.user, data.location.latitude, data.location.longitude);
     });
 
 });
