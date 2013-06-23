@@ -87,7 +87,8 @@ $(document).ready(function() {
 
 	    google.maps.event.addListener(map, 'click', function(event) {
 	    	console.log('Clicked on map', event);
-			$("#location").val(event.LatLng);
+
+			$("#location").val(event.LatLng.jb + " " + event.LatLng.kb);
 		});
 
 	    // Try HTML5 geolocation
