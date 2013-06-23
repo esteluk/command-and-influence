@@ -5,6 +5,12 @@ var troops = {}; // Your troops
 var selected_troop;
 var currentPosition; // The shared current position object
 var pushToken; // A push notification token for the device
+var paths = {}
+var polyOptions = {
+	strokeColor: '#000000',
+	strokeOpacity: 1.0,
+	strokeWeight: 3
+}
 
 $(document).ready(function() {
 
@@ -188,6 +194,9 @@ $(document).ready(function() {
 	        draggable: true
 	    });
 
+	    paths[id] = new google.maps.Polyline(polyOptions);
+		paths[id].setMap(map);
+
 		google.maps.event.addListener(troops[id], 'click', function() {
 //			console.log('this', this);
 			console.log('clicked marker', this.name);
@@ -206,10 +215,11 @@ $(document).ready(function() {
 	    console.log('removing marker', id);
 
 	    // add marker
-	    troops[surname] = null;
+	    delete(troops[id]);
+	    delete(paths[id]);
 
-		google.maps.event.addListener(troops[surname], 'click', function() {
-			console.log('clicked marker', surname);
+		google.maps.event.addListener(troops[id], 'click', function() {
+			console.log('removed marker', id);
 		});
 
 	}
@@ -220,6 +230,8 @@ $(document).ready(function() {
 	function update_marker(id, latitude, longitude) {
 		console.log('update_marker', latitude, longitude, id);
 	    troops[id].setPosition(new google.maps.LatLng(latitude, longitude));
+		var path = paths[id].getPath();
+		path.push(new google.maps.LatLng(latitude, longitude));
 	}
 
 	function reset_marker_icons() {
