@@ -64,11 +64,18 @@
         <ul id="command-history">
             <!-- our commands are recorded here in reverse chronological order -->
         </ul>
-        
-        <form method="post" action="#" id="command-form">
-            <textarea id="command" name="command" placeholder="Send a command..."></textarea>
-            <input type="submit" value="Send" id="send" name="send" />
-        </form>
+
+        <div id="commands">
+            <form method="post" action="#" id="command-form">
+                <textarea id="message" name="message" placeholder="Send a command..."></textarea>
+                <input type="submit" value="Send" id="send" name="send" />
+            </form>
+
+            <form method="post" action="#" id="location-form">
+                <input type="text" id="location">
+                <input type="submit" value="Send to location">
+            </form>
+        </div>
 
     </aside>
 

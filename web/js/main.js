@@ -93,6 +93,12 @@ $(document).ready(function() {
 	    };
 	    map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
+	    google.maps.event.addListener(map, 'click', function(event) {
+	    	console.log('Clicked on map', event);
+
+			$("#location").val(event.latLng.jb + " " + event.latLng.kb);
+		});
+
 	    // Try HTML5 geolocation
 	    if (navigator.geolocation) {
 
@@ -131,7 +137,7 @@ $(document).ready(function() {
 	        });
 
 
-	        			// grabs the new position and updates the map
+	        // grabs the new position and updates the map
 			function updateLocation() {
 				navigator.geolocation.getCurrentPosition(
 					function (position) {
@@ -286,44 +292,44 @@ $(document).ready(function() {
     });
 
     // form submit
-    $("form").submit(function(e) {
+    $("#command-form").submit(function(e) {
 
     	e.preventDefault();
 
-        var command = $('#command').val();
+        var message = $('#message').val();
 
         // no troop selected
         console.log('selected_troop', selected_troop);
         if (typeof(selected_troop) == 'undefined') {
         	alert('Select a troop, Commander!');
-	        $('#command').focus();
+	        $('#message').focus();
             return false;
         }
 
-        // empty command
-        if (command == '') {
+        // empty message
+        if (message == '') {
         	alert('We need a command, Commander!');
-	        $('#command').val('');
-	        $('#command').focus();
+	        $('#message').val('');
+	        $('#message').focus();
             return false;
         }
 
         // add to command history
-        $('#command-history').prepend('<li>' + command + '</li>');
+        $('#command-history').prepend('<li>' + message + '</li>');
         
         // fade in
         $('#command-history').find('li:first').hide().fadeIn();
 
         // send to pusher                    
         channel.trigger('client-command', {
-            'command': command,
+            'message': message,
             'from': 'commander',
             'to': selected_troop
         });
 
         // focus for easy re-entry
-        $('#command').val('');
-        $('#command').focus();
+        $('#message').val('');
+        $('#message').focus();
 
         // scroll to top of message history
         $('#command-history')[0].scrollTop = 0;
@@ -331,6 +337,35 @@ $(document).ready(function() {
         // stop default form submit
         return false;
 
+    });
+
+    $("#location-form").submit(function(e) {
+    	e.preventDefault();
+
+    	var latlng = $("#location").val().trim().split(" ");
+    	if (latlng.length < 2) {
+    		$("#location").val("");
+    		$("#location").focus();
+    		return false;
+    	}
+
+    	$("#command-history").prepend('<li>' + 'Move to map location' + '</li>');
+
+    	// fade in
+    	$("#command-history").find('li:first').hide().fadeIn();
+
+    	// send to pusher
+    	channel.trigger('client-command', {
+    		'message' : $("#message").val(),
+    		'command' : 'goto',
+    		'extras' : { 'lat' : latlng[0], 'lng' : latlng[1]}
+    	});
+
+    	$("#location").val('');
+
+    	$("#command-history")[0].scrollTop = 0;
+
+    	return false;
     });
 
     // pusher:member_added
