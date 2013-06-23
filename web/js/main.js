@@ -85,7 +85,7 @@ $(document).ready(function() {
 		});
 
 	    var mapOptions = {
-	        zoom: 16,
+	        zoom: 15,
 //	        mapTypeId: google.maps.MapTypeId.TERRAIN,
 	        streetViewControl: false //,
 //	        maxZoom: 22,
@@ -132,6 +132,11 @@ $(document).ready(function() {
 
 				currentPosition = new CBHelperCurrentLocation(position.coords.latitude, position.coords.longitude, position.coords.altitude);
 				helper.currentLocation = currentPosition;
+
+//				infowindow = new google.maps.InfoWindow({
+//					content: "<div style='width:200px; height:100px; overflow:scroll;'><img style='float:left; margin:0 5px 5px 0;' src=\""+val[1].picUrl+"\" >"+val[1].name+": Peerindex: "+val[0]+" tweet: "+val[1].tweet+"</div>"
+//				});
+
 
 //				var pushManager = new PushNotificationManager();
 				
@@ -246,6 +251,7 @@ $(document).ready(function() {
 	    troops[id].setPosition(new google.maps.LatLng(latitude, longitude));
 		var path = paths[id].getPath();
 		path.push(new google.maps.LatLng(latitude, longitude));
+		delete(path[0]);
 	}
 
 	function reset_marker_icons() {
@@ -401,5 +407,59 @@ $(document).ready(function() {
         // surname this is hardcoded for now until we handle marker add/update
         update_marker(data.user, data.location.latitude, data.location.longitude);
     });
+
+	// http://paul-sobek.com/LocPeerIndexResultsExample.html
+	$.getJSON('http://paul-sobek.com/cgi-home/getLoc.py?lat=51.507887&lon=-0.131149&radius=1km', function(data) {
+		var items = [];
+
+		$.each(data, function(key, val) {
+
+		console.log('Twitter/peerindex', val[1].geo.coordinates[0]);
+		console.log('Twitter/peerindex', val[1].geo.coordinates[1]);
+		console.log('Twitter/peerindex', val[1].name);
+		console.log('Twitter/peerindex', val[1].tweet);
+		console.log('Twitter/peerindex', val[0]);
+		infowindow = new google.maps.InfoWindow({
+			content: "<div style='width:200px; height:100px; overflow:scroll;'><img style='float:left; margin:0 5px 5px 0;' src=\""+val[1].picUrl+"\" >"+val[1].name+": Peerindex: "+val[0]+" tweet: "+val[1].tweet+"</div>"
+		});
+
+		var marker = new google.maps.Marker({
+			position: new google.maps.LatLng(val[1].geo.coordinates[0], val[1].geo.coordinates[1]),
+			map: map,
+			title: val[1].name 
+		});
+		google.maps.event.addListener(marker, 'click', function() {
+			infowindow.open(map,marker);
+		});
+		//console.log('Twitter/peerindex', val[1].picUrl);
+		});
+	});
+
+	/*
+	$('#summon').click(function(e){
+		e.preventDefault();
+		$.ajax({
+			type: "POST",
+			url: 'https://api.cloudbase.io/commandandinfluence/notifications',
+			data: {
+				'app_uniq' : '17b41ff67e279f762ba20a5bbc3fa959',
+				'app_pwd' : hex_md5('76Indnja'),
+				'device_uniq' : 'webapp',
+				'post_data' : { 
+					'channel': 'all',
+					'alert' : 'Help us track down this man'
+				},
+				'output_format': 'jsonp',
+				'jsonp_function': 'foo'
+			},
+			success: function(response){
+				console.log('response', response);
+			},
+			dataType: 'jsonp',
+			jsonp: 'foo'
+		});
+		return false;
+	});
+	*/
 
 });
