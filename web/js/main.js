@@ -123,7 +123,7 @@ $(document).ready(function() {
 	        });
 
 
-	        			// grabs the new position and updates the map
+	        // grabs the new position and updates the map
 			function updateLocation() {
 				navigator.geolocation.getCurrentPosition(
 					function (position) {
@@ -167,10 +167,15 @@ $(document).ready(function() {
 
 	google.maps.event.addDomListener(window, 'load', initialize);
 
+	google.maps.event.addListener(map, 'click', function(event) {
+		$("#location").val(event.LatLng);
+
+	});
+
 	function update_marker(latitude, longitude, surname) {
 
 	    // grab a random colour and letter
-//	    var colour = markers.colours[Math.floor(Math.random() * markers.colours.length)];
+		// var colour = markers.colours[Math.floor(Math.random() * markers.colours.length)];
 	    var colour = 'darkgreen';
 	    console.log(surname);
 	    var letter = surname[0].toUpperCase();
