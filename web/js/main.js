@@ -17,7 +17,7 @@ $(document).ready(function() {
     });
 
     function resizeCommandHistory() {
-        var list_height = $(window).height() - $('aside').find('form').height();
+        var list_height = $(window).height() - $('aside').find('#commands').height();
         $('aside').find('ul').css('height', list_height);
     }
 
