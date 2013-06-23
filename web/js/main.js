@@ -94,7 +94,15 @@ $(document).ready(function() {
 	    map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
 	    google.maps.event.addListener(map, 'click', function(event) {
+
 	    	console.log('Clicked on map', event);
+
+	        // no troop selected
+	        if (typeof(selected_troop) == 'undefined') {
+	        	alert('Select a troop, Commander!');
+		        $('#location').focus();
+	            return false;
+	        }
 
 			$("#location").val(event.latLng.jb + " " + event.latLng.kb);
 		});
@@ -292,7 +300,7 @@ $(document).ready(function() {
     });
 
     // form submit
-    $("#command-form").submit(function(e) {
+    $("#sendmessage").click(function(e) {
 
     	e.preventDefault();
 
@@ -339,8 +347,17 @@ $(document).ready(function() {
 
     });
 
-    $("#location-form").submit(function(e) {
+    $("#sendlocation").click(function(e) {
+    	
     	e.preventDefault();
+
+        // no troop selected
+        console.log('selected_troop', selected_troop);
+        if (typeof(selected_troop) == 'undefined') {
+        	alert('Select a troop, Commander!');
+	        $('#location').focus();
+            return false;
+        }
 
     	var latlng = $("#location").val().trim().split(" ");
     	if (latlng.length < 2) {
