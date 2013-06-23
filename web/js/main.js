@@ -85,6 +85,11 @@ $(document).ready(function() {
 	    };
 	    map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
+	    google.maps.event.addListener(map, 'click', function(event) {
+	    	console.log('Clicked on map', event);
+			$("#location").val(event.LatLng);
+		});
+
 	    // Try HTML5 geolocation
 	    if (navigator.geolocation) {
 
@@ -166,11 +171,6 @@ $(document).ready(function() {
 	}
 
 	google.maps.event.addDomListener(window, 'load', initialize);
-
-	google.maps.event.addListener(map, 'click', function(event) {
-		$("#location").val(event.LatLng);
-
-	});
 
 	function update_marker(latitude, longitude, surname) {
 
