@@ -291,7 +291,7 @@ $(document).ready(function() {
 
     	// send to pusher
     	channel.trigger('client-command', {
-    		'message' : $("#message"),
+    		'message' : $("#message").val(),
     		'command' : 'goto',
     		'extras' : { 'lat' : latlng[0], 'lng' : latlng[1]}
     	});
