@@ -245,14 +245,14 @@ $(document).ready(function() {
         var message = $('#message').val();
 
         // empty message
-        if (command == '') {
+        if (message == '') {
 	        $('#message').val('');
 	        $('#message').focus();
             return false;
         }
 
         // add to command history
-        $('#command-history').prepend('<li>' + command + '</li>');
+        $('#command-history').prepend('<li>' + message + '</li>');
         
         // fade in
         $('#command-history').find('li:first').hide().fadeIn();
