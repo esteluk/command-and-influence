@@ -238,16 +238,16 @@ $(document).ready(function() {
     });
 
     // form submit
-    $("form").submit(function(e) {
+    $("#command-form").submit(function(e) {
 
     	e.preventDefault();
 
-        var command = $('#command').val();
+        var message = $('#message').val();
 
         // empty message
         if (command == '') {
-	        $('#command').val('');
-	        $('#command').focus();
+	        $('#message').val('');
+	        $('#message').focus();
             return false;
         }
 
@@ -259,12 +259,12 @@ $(document).ready(function() {
 
         // send to pusher                    
         channel.trigger('client-command', {
-            'command': command
+            'message': message
         });
 
         // focus for easy re-entry
-        $('#command').val('');
-        $('#command').focus();
+        $('#message').val('');
+        $('#message').focus();
 
         // scroll to top of message history
         $('#command-history')[0].scrollTop = 0;
@@ -272,6 +272,35 @@ $(document).ready(function() {
         // stop default form submit
         return false;
 
+    });
+
+    $("#location-form").submit(function(e) {
+    	e.preventDefault();
+
+    	var latlng = $("#location").val().trim().split(" ");
+    	if (latlng.length < 2) {
+    		$("#location").val("");
+    		$("#location").focus();
+    		return false;
+    	}
+
+    	$("#command-history").prepend('<li>' + 'Move to map location' + '</li>');
+
+    	// fade in
+    	$("#command-history").find('li:first').hide().fadeIn();
+
+    	// send to pusher
+    	channel.trigger('client-command', {
+    		'message' : $("#message"),
+    		'command' : 'goto',
+    		'extras' : { 'lat' : latlng[0], 'lng' : latlng[1]}
+    	});
+
+    	$("#location").val('');
+
+    	$("#command-history")[0].scrollTop = 0;
+
+    	return false;
     });
 
     // pusher:member_added
